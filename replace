@@ -1,0 +1,147 @@
+if (strlen($input) == 13)  {
+
+                    
+$cek3 = mysqli_query($koneksi,"SELECT * FROM tb_stock_point_input where order_no = '$order_no' and lot = '$lot' ");
+if(mysqli_num_rows($cek3) > 0){
+    $ambilmodel1 = mysqli_query($koneksi, "SELECT * FROM tb_stock_point_input where order_no = '$order_no' and lot = '$lot'");
+    while($row = mysqli_fetch_array($ambilmodel1)) { 
+        $ceklocactasli = $row['loc_input'];
+    }
+}else{
+    
+}
+
+
+
+    $cekinput = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM tb_stock_point_input WHERE casemark = '$input' "));
+        if( $cekinput == ''){
+
+        
+        $ambilmodel = mysqli_query($koneksi, "SELECT * FROM tb_stock_point_fas");
+        while($ambilmodelprogres = mysqli_fetch_array($ambilmodel)) { 
+            $cekordernoprogres  = $ambilmodelprogres['order_no'];
+            $cekmodelprogres      = $ambilmodelprogres['model'];
+            $ceklotprogres      = $ambilmodelprogres['lot'];
+            $cekcase_planprogres      = $ambilmodelprogres['case_plan'];
+            } 
+                $cekprogres = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM tb_stock_point_progres WHERE casemark = '$input' "));
+                if($cekprogres =='1'){
+
+                }else{  
+                    $cekfirst = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM tb_stock_point_progres"));
+                    
+                        
+                        if($cekfirst == '0'){
+                            $sql21="INSERT INTO tb_stock_point_progres (tgl,order_no,model,lot,casemark,case_no,jam,pengguna) VALUES ('$tanggal_oriw','$order_no','$cekmodelprogres','$lot','$input','$case_no','$jam_ori','$getusername')";  
+                            mysqli_query($koneksi, $sql21);
+                            mysqli_close ($koneksi);
+                    
+                        }
+                        elseif($cekfirst >= '1' AND $cekfirst <= '5'){
+                            
+                            $ambilorderlotjumlah = mysqli_query($koneksi, "SELECT * FROM tb_stock_point_progres WHERE order_no = '$order_no' and  lot = '$lot'");
+                            while($ambilorderlotjumlah1 = mysqli_fetch_array($ambilorderlotjumlah)) { 
+                                $cekorderjumlah  = $ambilorderlotjumlah1['order_no'];
+                                $ceklotjumlah     = $ambilorderlotjumlah1['lot'];
+                            }
+                                    if($lot == $ceklotjumlah AND $order_no == $cekorderjumlah){
+
+                                        $sql20="INSERT INTO tb_stock_point_progres (tgl,order_no,model,lot,casemark,case_no,jam,pengguna) VALUES ('$tanggal_oriw','$order_no','$cekmodelprogres','$lot','$input','$case_no','$jam_ori','$getusername')";  
+                                        mysqli_query($koneksi, $sql20);
+                                        mysqli_close ($koneksi);
+                                    }
+                                    else{
+                                        echo '<div id="tampil_modal"><div id="modal"><div id="modal_atas">warning</div><p>LOT BERBEDA !!!</p>
+                            <a href="inde.php"><button id="oke">oke</button></a></div></div>';
+                                    }
+
+                        }elseif($cekfirst >= '6'){
+                            echo '<div id="tampil_modal"><div id="modal"><div id="modal_atas">warning</div><p>CASE TERLALU BANYAK !!!</p>
+                            <a href="inde.php"><button id="oke">oke</button></a></div></div>';
+                        }
+            
+                }     
+        }else{
+                echo '<script>alert("Case Gagal Double Input...!")</script>';
+                echo '<META HTTP-EQUIV="Refresh" Content="3; URL=inde.php ">';
+            }
+        
+
+
+
+}elseif (strlen($input) <= 3 AND strlen($input) >= 2)  {
+
+
+}
+
+$dataloc = mysqli_query($koneksi, "SELECT * FROM tb_stock_point_progres WHERE  pengguna = '$getusername'");
+                    while($dataloc1 = mysqli_fetch_array($dataloc)) { 
+                    $order_nodataloc1      = $dataloc1['order_no'];
+                    $lotdataloc1        = $dataloc1['lot'];
+                    $loc_inputdataloc1  = $dataloc1['loc_input'];
+                    } 
+                    
+                    if($loc_inputdataloc1 == ''){
+                        $datalocinputdata = mysqli_query($koneksi, "SELECT * FROM tb_stock_point_input ");
+                        while($datalocinputdata1 = mysqli_fetch_array($datalocinputdata)) { 
+                        $order_nodatalocinputdata1      = $datalocinputdata1['order_no'];
+                        $lotdatalocinputdata1        = $datalocinputdata1['lot'];
+                        $loc_inputdatalocinputdata1  = $datalocinputdata1['loc_input'];
+                        } 
+
+                        $jumlahdatainputan = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM tb_stock_point_input  "));
+                        if($jumlahdatainputan == '0'){
+                            $hasil = mysqli_query($koneksi, "UPDATE tb_stock_point_progres SET loc_input='$input' WHERE order_no='$order_nodataloc1' and lot='$lotdataloc1' and pengguna = '$getusername'");
+                            $movetable = mysqli_query($koneksi, "INSERT INTO tb_stock_point_input (tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna) SELECT tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+                            $deleted = mysqli_query($koneksi, "DELETE FROM tb_stock_point_progres WHERE pengguna = '$getusername'"); 
+                        }
+                        elseif($jumlahdatainputan >= '1'){
+                            if(in_array($order_nodataloc1, $order_nodatalocinputdata1, TRUE)){
+                                if (in_array($lotdataloc1, $lotdatalocinputdata1,TRUE)){
+                                    if ($input == $loc_inputdatalocinputdata1){
+                                        $hasil = mysqli_query($koneksi, "UPDATE tb_stock_point_progres SET loc_input='$input' WHERE order_no='$order_nodataloc1' and lot='$lotdataloc1' and pengguna = '$getusername'");
+                                        $movetable = mysqli_query($koneksi, "INSERT INTO tb_stock_point_input (tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna) SELECT tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+                                        $deleted = mysqli_query($koneksi, "DELETE FROM tb_stock_point_progres WHERE pengguna = '$getusername'"); 
+                                    }
+                                }
+                            }
+                        }
+                           
+                            //      // baru sampe sini ,tinggal membedakan lot dan order untuk input
+                            //             if($lotdataloc1 == $lotdatalocinputdata1 and $order_nodataloc1 == $order_nodatalocinputdata1){
+                            //             if($input == $loc_inputdatalocinputdata1){
+
+                            //                     $hasil = mysqli_query($koneksi, "UPDATE tb_stock_point_progres SET loc_input='$input' WHERE order_no='$order_nodataloc1' and lot='$lotdataloc1' and pengguna = '$getusername'");
+                            //                     $movetable = mysqli_query($koneksi, "INSERT INTO tb_stock_point_input (tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna) SELECT tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+                            //                     $deleted = mysqli_query($koneksi, "DELETE FROM tb_stock_point_progres WHERE pengguna = '$getusername'");      
+                            //                 }
+                            //             elseif($input != $loc_inputdatalocinputdata1){
+                            //                 echo '<script>alert("Tidak Boleh Beda LOC...!")</script>';
+                            //                 echo '<META HTTP-EQUIV="Refresh" Content="3; URL=inde.php ">';  
+                            //                 }  
+                            //             }
+                            // }else{
+                            //     $hasil3 = mysqli_query($koneksi, "UPDATE tb_stock_point_progres SET loc_input='$input' WHERE order_no='$order_nodataloc1' and lot='$lotdataloc1' and pengguna = '$getusername'");
+                            //     $movetable3 = mysqli_query($koneksi, "INSERT INTO tb_stock_point_input (tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna) SELECT tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+                            //     $deleted3 = mysqli_query($koneksi, "DELETE FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+                            // }
+                    }elseif($loc_inputdataloc1 >= '1' and $loc_inputdataloc1 >= '5' ){
+
+                        $datalocinputdata0 = mysqli_query($koneksi, "SELECT * FROM tb_stock_point_input  ");
+                        while($datalocinputdata10 = mysqli_fetch_array($datalocinputdata0)) { 
+                        $order_nodatalocinputdata10      = $datalocinputdata10['order_no'];
+                        $lotdatalocinputdata10        = $datalocinputdata10['lot'];
+                        $loc_inputdatalocinputdata10  = $datalocinputdata10['loc_input'];
+                        } 
+                        
+                            $hasil1 = mysqli_query($koneksi, "UPDATE tb_stock_point_progres SET loc_input='$input' WHERE order_no='$order_nodataloc1' and lot='$lotdataloc1' and pengguna = '$getusername'");
+                            $movetable1 = mysqli_query($koneksi, "INSERT INTO tb_stock_point_input (tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna) SELECT tgl,order_no,model,lot,loc_input,case_no,casemark,jam,pengguna FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+                            $deleted1 = mysqli_query($koneksi, "DELETE FROM tb_stock_point_progres WHERE pengguna = '$getusername'");
+
+                            }else{
+                                $hasil  = 'hajhgasjgfjksghuirshiohgeruihuih';
+                            }
+                    }else{
+                        $saya = 'k';
+                    }
+            
